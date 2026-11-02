@@ -103,7 +103,7 @@ classDiagram
 #### Equipes
 ```mermaid
 classDiagram
-    class EquipesController {
+    class TeamController {
         <<Microsserviço>>
         +POST /api/team
         +GET /api/team/code - com dados dos membros
@@ -124,14 +124,14 @@ classDiagram
         +string Role
     }
 
-    EquipesController ..> Team : gerencia entidade
+    TeamController ..> Team : gerencia entidade
     Team o-- TeamMember : 
 ```
 
 #### Ideias
 ```mermaid
 classDiagram
-    class IdeiasController {
+    class IdeaController {
         <<Microsserviço>>
         +POST /api/link
         +GET /api/link/code
@@ -164,7 +164,7 @@ classDiagram
         +datetime CreationDate
     }
 
-    IdeiasController ..> Link : gerencia entidade
+    IdeaController ..> Link : gerencia entidade
     Link o-- History : registra
 ```
 
@@ -173,24 +173,24 @@ classDiagram
 #### Hipóteses
 ```mermaid
 classDiagram
-    class HypotesesController {
+    class HypothesisController {
         <<Microsserviço>>
-        +POST /api/hypothese
-        +GET /api/hypothese?linkCode=code
-        +PUT /api/hypotese/result/code
+        +POST /api/hypothesis
+        +GET /api/hypothesis?linkCode=code
+        +PUT /api/hypothesis/result/code
         <> ao registrar o resultado, chama o serviço de Ideias para atualizar a validação do nó/link()
     }
 
-    class Hypotese {
+    class Hypothesis {
         +string Code PK
         +string LinkCode FK
         +string Description
-        +string Sucess
+        +string Success
         +string Result
         +datetime CreationDate
     }
 
-    HypotesesController ..> Hypotese : gerencia
+    HypothesisController ..> Hypothesis : gerencia
 ```
 
 
@@ -210,7 +210,7 @@ classDiagram
         +string LinkCode FK
         +string AutorCode FK
         +string Test
-        +number Note
+        +number Rating
         +datetime CreationDate
     }
 
