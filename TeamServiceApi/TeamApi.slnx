@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TeamServiceApi/TeamApi.csproj" />
+  <Project Path="TeamServiceApiClassLibrary/TeamApiClassLibrary.csproj" />
+</Solution>

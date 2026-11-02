@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FeedbackApi/FeedbackApi.csproj" />
+  <Project Path="FeedbackApiClassLibrary/FeedbackApiClassLibrary.csproj" />
+</Solution>
