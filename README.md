@@ -1,6 +1,4 @@
-# Branchstorm
-
-**Toda boa ideia começa aqui!**
+![[1 - wide.png]]
 
 O nome junta *branch* (ramo, como no Git) com *brainstorm* (avalanche de ideias): um brainstorm que se ramifica. Plataforma colaborativa para evoluir e validar ideias. Cada problema vira a raiz de uma árvore: pessoas propõem soluções, comentam, testam hipóteses e a equipe vai selecionando versões até chegar a uma solução final, com todo o caminho registrado.
 
@@ -8,6 +6,7 @@ A ideia deste projeto foi justamente pensada para ajudar em uma dor dos estudant
 
 Com isso, este é o projeto final da disciplina de Arquitetura de Software (Sistemas Distribuídos - micro serviços) em Engenharia de Software dos estudantes do Centro Universitário SATC. Orientado pelo professor: Eduardo Cizeski Meneghel.
 
+- Dominio: [www.branchstorm.tech](https://www.branchstorm.tech/)
 - Aplicação publicada no Render: `<link do Render>`
 - Equipe: `Pedro Pavei`, `Matheus Cechinel`, `Thales Vaz`
 
