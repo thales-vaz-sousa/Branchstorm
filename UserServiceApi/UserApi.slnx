@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="UserServiceApi/UserApi.csproj" />
+  <Project Path="UserServiceApiClassLibrary/UserApiClassLibrary.csproj" />
+</Solution>
