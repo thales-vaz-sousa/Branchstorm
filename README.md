@@ -9,7 +9,7 @@ A ideia deste projeto foi justamente pensada para ajudar em uma dor dos estudant
 Com isso, este é o projeto final da disciplina de Arquitetura de Software (Sistemas Distribuídos - micro serviços) em Engenharia de Software dos estudantes do Centro Universitário SATC. Orientado pelo professor: Eduardo Cizeski Meneghel.
 
 - Aplicação publicada no Render: `<link do Render>`
-- Equipe: `Pedro Pavei`, `Matheus`, `Thales Vaz`
+- Equipe: `Pedro Pavei`, `Matheus Cechinel`, `Thales Vaz`
 
 ---
 ## 1. Requisitos
@@ -63,8 +63,8 @@ Cada serviço tem seu próprio banco e só conversa com os outros por HTTP no pa
 ```mermaid
 flowchart LR
   Equipes -- "GET usuário" --> Usuarios
-  Feedback -- "GET nó" --> Ideias
-  Hipoteses == "PUT validação do nó" ==> Ideias
+  Feedback -- "GET nó/link" --> Ideias
+  Hipoteses == "PUT validação do nó/link" ==> Ideias
 ```
 
 Linhas finas são buscas de dados; a linha grossa é a alteração de dados entre serviços.
@@ -115,7 +115,7 @@ classDiagram
     class Team {
         +string Code PK
         +string Name
-        +IEnumerable<TeamMember> Member
+        +IEnumerable~TeamMember~ Member
     }
 
     class TeamMember {
