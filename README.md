@@ -105,8 +105,8 @@ classDiagram
     class TeamController {
         <<Microsserviço>>
         +POST /api/team
-        +GET /api/team/code - com dados dos membros
-        +POST /api/team/members/code
+        +GET /api/team/code 
+        +PATCH /api/team/code - com dados dos membros
 
         <> Busca dados de cada membro no serviço de Usuários ()
     }
