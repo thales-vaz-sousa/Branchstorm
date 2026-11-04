@@ -1,4 +1,4 @@
-![icon](UI/1%20-%20wide.png)
+![[1 - wide.png]]
 
 O nome junta *branch* (ramo, como no Git) com *brainstorm* (avalanche de ideias): um brainstorm que se ramifica. Plataforma colaborativa para evoluir e validar ideias. Cada problema vira a raiz de uma árvore: pessoas propõem soluções, comentam, testam hipóteses e a equipe vai selecionando versões até chegar a uma solução final, com todo o caminho registrado.
 
@@ -82,21 +82,21 @@ Linhas finas são buscas de dados; a linha grossa é a alteração de dados entr
 #### Usuários
 ```mermaid
 classDiagram
-    class UsuariosController {
+    class UserController {
         <<Microsserviço>>
-        +POST /api/users
-        +GET /api/users
-        +GET /api/user/code
+        +POST /api/user
+        +GET /api/user - lista de varios usuarios
+        +GET /api/user/[query] - somente um usuario
         <<Integração>> Consultado pelo serviço de Equipes ()
     }
 
-    class Usuario {
+    class User {
         +string Code PK
         +string Name
         +string Email
     }
 
-    UsuariosController ..> Usuario : gerencia entidade
+    UserController ..> User : gerencia entidade
 ```
 
 #### Equipes
@@ -105,8 +105,8 @@ classDiagram
     class TeamController {
         <<Microsserviço>>
         +POST /api/team
-        +GET /api/team/code 
-        +PATCH /api/team/code - com dados dos membros
+        +GET /api/team/code - dados dos membros no grupo
+        +PATCH /api/team/code - atualiza membros no grupo
 
         <> Busca dados de cada membro no serviço de Usuários ()
     }
@@ -114,7 +114,7 @@ classDiagram
     class Team {
         +string Code PK
         +string Name
-        +IEnumerable~TeamMember~ Member
+        +IEnumerable~TeamMember~ Members
     }
 
     class TeamMember {
@@ -132,11 +132,11 @@ classDiagram
 classDiagram
     class IdeaController {
         <<Microsserviço>>
-        +POST /api/link
-        +GET /api/link/code
-        +GET /api/link/tree/code - CTE recursiva SQLite
-        +PUT /api/link/select/code
-        +PUT /api/link/validation/code
+        +POST /api/idea
+        +GET /api/idea/code
+        +GET /api/idea/tree/code - CTE recursiva SQLite
+        +PUT /api/idea/select/code
+        +PUT /api/idea/validation/code
 
         <> Consultado pelo Feedback e recebe validação de Hipóteses ()
     }
@@ -223,7 +223,7 @@ classDiagram
 | #   | Tipo               | Origem → Destino   | O que acontece                                                                                                                |
 | --- | ------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | 1   | Busca de dados     | Equipes → Usuários | Ao exibir uma equipe, busca os dados de cada membro (`GET /api/user/{code}`)                                                  |
-| 2   | Busca de dados     | Feedback → Ideias  | Ao cadastrar um feedback, valida se o nó existe e está aberto (`GET /api/link/{code}`)                                        |
+| 2   | Busca de dados     | Feedback → Ideias  | Ao cadastrar um feedback, valida se o nó/link existe e está aberto (`GET /api/link/{code}`)                                   |
 | 3   | Alteração de dados | Hipóteses → Ideias | Ao registrar o resultado de uma hipótese, atualiza a validação do nó e grava no histórico (`PUT /api/link/validation/{code}`) |
 #### 2.4 Ideia de UI
 
@@ -253,7 +253,7 @@ Já existem ferramentas e projetos que cobrem partes do Branchstorm:
 ## 4. Tecnologias
 
 - .NET (template de microsserviço da disciplina)
-- Angular (frontend)
+- Angular (frontend para usuario)
 - SQLite (um banco por serviço)
 - Padrão REST sobre HTTP
 - Servidor container Render
@@ -267,7 +267,6 @@ A ver ainda
 ## 6. Extras e evolução futura
 
 
-
 ### 6.1 Extras previstos
 
 - Integração com IA: 
@@ -276,7 +275,7 @@ A ver ainda
 - Comunicação assíncrona na integração Hipóteses → Ideias (mensageria).
 - Observabilidade: logs estruturados e health checks em todos os serviços (provavelmente Swarmpit)
 
-### 6.2 Ideias de evolução
+### 6.2 Ideias/Recursos de evolução
 
 - **Troca de perspectivas (brainstorm aleatório):** a plataforma sorteia pares de equipes. A equipe A lança um problema e a equipe B propõe as soluções; depois os papéis se invertem. Seria um novo serviço, **Desafios**, que cria o nó (Link) raiz na equipe A e designa a equipe B para responder, reaproveitando os serviços de Ideias e Equipes.
 - **Batalha de equipes:** várias equipes recebem o mesmo problema e cada uma desenvolve a própria árvore de soluções. No fim, os caminhos são comparados (hipóteses validadas, feedback recebido, profundidade da árvore).
