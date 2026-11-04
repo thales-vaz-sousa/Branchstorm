@@ -14,4 +14,8 @@
     <Folder Include="Container\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TeamServiceApiClassLibrary\TeamApiClassLibrary.csproj" />
+  </ItemGroup>
+
 </Project>
