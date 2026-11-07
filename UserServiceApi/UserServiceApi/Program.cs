@@ -1,10 +1,10 @@
+using BranchstormDomain.Infrastructure.Database;
 using Scalar.AspNetCore;
 using UserApi.Containers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
 builder.Services.AddDependencyInjectionContainers();
 
 builder.Services.AddOpenApi(options =>
@@ -13,6 +13,20 @@ builder.Services.AddOpenApi(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider
+        .GetRequiredService<DatabaseInitializer>();
+
+    var schemaPath = Path.Combine(
+        app.Environment.ContentRootPath,
+        "Database",
+        "schemaUsers.sql"
+    );
+
+    await initializer.InitializeAsync(schemaPath);
+}
 
 if (app.Environment.IsDevelopment())
 {

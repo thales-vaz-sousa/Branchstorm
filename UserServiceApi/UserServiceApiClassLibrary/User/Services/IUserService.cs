@@ -6,8 +6,8 @@ namespace UserApiClassLibrary.User.Services
 {
     public interface IUserService
     {
-        Task CreateAsync(UserDto userDto);
-        Task<UserResult> FindOneAsync(FindUserQuery query);
-        Task<IEnumerable<UserResult>> FindAsync();
+        Task<UserResult> CreateAsync(UserDto userDto);
+        Task<UserResult?> FindOneAsync(string code);
+        Task<IEnumerable<UserResult>> FindAsync(FindUsersQuery query);
     }
 }

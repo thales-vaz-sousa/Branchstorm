@@ -1,0 +1,5 @@
+﻿CREATE TABLE IF NOT EXISTS Users (
+    Code TEXT PRIMARY KEY,
+    Name TEXT NOT NULL,
+    Email TEXT NOT NULL
+);

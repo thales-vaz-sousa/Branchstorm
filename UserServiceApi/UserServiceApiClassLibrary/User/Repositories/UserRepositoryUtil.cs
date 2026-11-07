@@ -4,9 +4,10 @@ namespace UserApiClassLibrary.User.Repositories
 {
     public static class UserRepositoryUtil
     {
+
         public static IServiceCollection UseUserRepository(this IServiceCollection services)
         {
-            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             return services;
         }
     }

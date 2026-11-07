@@ -4,14 +4,14 @@ O nome junta *branch* (ramo, como no Git) com *brainstorm* (avalanche de ideias)
 
 A ideia deste projeto foi justamente pensada para ajudar em uma dor dos estudantes em mapear ideias para possíveis projetos e/ou temas de inovação na área em engenharia de software (podendo abranger ou ser usado por outras áreas de conhecimento). 
 
-Com isso, este é o projeto final da disciplina de Arquitetura de Software (Sistemas Distribuídos - micro serviços) em Engenharia de Software dos estudantes do Centro Universitário SATC. Orientado pelo professor: Eduardo Cizeski Meneghel.
+Com isso, este é o projeto final da disciplina de Arquitetura de Software (Sistemas Distribuídos - microsserviços) em Engenharia de Software dos estudantes do Centro Universitário SATC. Orientado pelo professor: Eduardo Cizeski Meneghel.
 
-- Dominio: [www.branchstorm.tech](https://www.branchstorm.tech/)
+- Domínio: [www.branchstorm.tech](https://www.branchstorm.tech/)
 - Aplicação publicada no Render: `<link do Render>`
 - Equipe: `Pedro Pavei`, `Matheus Cechinel`, `Thales Vaz`
 
 ---
-## 1. Requisitos
+## 1 Requisitos
 
 ### 1.1 Propósito do sistema
 
@@ -27,20 +27,20 @@ Permitir que pessoas e equipes cadastrem problemas e/ou ideias, desenvolvam solu
 
 ### 1.3 Requisitos funcionais
 
-| Código | Requisito                                                                                  |
-| ------ | ------------------------------------------------------------------------------------------ |
-| RF01   | Cadastrar, consultar e listar usuários                                                     |
-| RF02   | Criar equipes e adicionar/remover membros com um papel (dono, colaborador, avaliador)      |
-| RF03   | Cadastrar um problema/ideia raiz                                                           |
-| RF04   | Propor soluções e novas versões como filhos de um nó (link) da árvore, informando o motivo |
-| RF05   | Selecionar um nó (os irmãos viram descartados) e marcar um nó como solução final           |
-| RF06   | Consultar a árvore completa de uma ideia, incluindo nós descartados                        |
-| RF07   | Cadastrar hipóteses em um nó (link), com critério de sucesso                               |
-| RF08   | Registrar o resultado de uma hipótese (validada ou refutada)                               |
-| RF09   | Atualizar automaticamente a validação do nó a partir do resultado da hipótese              |
-| RF10   | Comentar e dar nota em um nó (link), apenas se ele estiver aberto a feedback               |
-| RF11   | Listar os feedbacks de um nó (link)                                                        |
-|        |                                                                                            |
+| Código | Requisito                                                                                            |
+| ------ | ---------------------------------------------------------------------------------------------------- |
+| RF01   | Cadastrar, consultar e listar usuários                                                               |
+| RF02   | Criar equipes e adicionar/remover membros com um papel (administrador, dono, colaborador, avaliador) |
+| RF03   | Cadastrar um problema/ideia raiz                                                                     |
+| RF04   | Propor soluções e novas versões como filhos de um nó (link) da árvore, informando o motivo           |
+| RF05   | Selecionar um nó (os irmãos viram descartados) e marcar um nó como solução final                     |
+| RF06   | Consultar a árvore completa de uma ideia, incluindo nós descartados                                  |
+| RF07   | Cadastrar hipóteses em um nó (link), com critério de sucesso                                         |
+| RF08   | Registrar o resultado de uma hipótese (validada ou refutada)                                         |
+| RF09   | Atualizar automaticamente a validação do nó a partir do resultado da hipótese                        |
+| RF10   | Comentar e dar nota em um nó (link), apenas se ele estiver aberto a feedback                         |
+| RF11   | Listar os feedbacks de um nó (link)                                                                  |
+|        |                                                                                                      |
 
 ### 1.4 Regras de negócio principais
 
@@ -50,29 +50,29 @@ Permitir que pessoas e equipes cadastrem problemas e/ou ideias, desenvolvam solu
 
 ---
 
-## 2. Descritivo técnico
+## 2 Descritivo técnico
 
 ### 2.1 Visão geral
 
-- Back-end com arquitetura de microsserviços, cada microserviço segue o template visto em sala: **.NET, SQLite e REST**. 
+- Back-end com arquitetura de microsserviços, cada microsserviço segue o template visto em sala: **.NET, SQLite e REST**. 
 - Frontend em Angular.
 - API principal (gateway): ponto de entrada único do back-end. O Angular só fala com ela, e ela chama os microsserviços.
 
 Cada serviço tem seu próprio banco e só conversa com os outros por HTTP no padrão REST.
 
-*Uma evolução do projeto para o banco de dados é migrar a arquitetura do banco unificado a um só em postgree com diferentes clientes aos serviços*
+*Evolução prevista: migrar de um SQLite por serviço para um PostgreSQL, com um banco e um usuário por serviço.*
 
 ```mermaid
 flowchart TD
   Branchstorm_["Branchstorm (Frontend Angular)"] --> Gateway["Branchstorm API principal (gateway)"]
   Gateway --> User_API
   Gateway --> Team_API
-  Gateway --> Ideia_API
-  Gateway --> Hypotesis_API
+  Gateway --> Idea_API
+  Gateway --> Hypothesis_API
   Gateway --> Feedback_API
-  Team_API -. "GET usuário" .-> User_API
-  Feedback_API -. "GET nó/link" .-> Ideia_API
-  Hypotesis_API == "PUT validação do nó/link" ==> Ideia_API
+  Team_API -. "GET usuários em lote" .-> User_API
+  Feedback_API -. "GET nó/link" .-> Idea_API
+  Hypothesis_API == "PUT validação do nó/link" ==> Idea_API
 ```
 
 As setas sólidas finas saem do gateway, que atende o Angular. As linhas tracejadas são buscas de dados entre serviços; a linha grossa é a alteração de dados entre serviços.
@@ -88,15 +88,15 @@ As setas sólidas finas saem do gateway, que atende o Angular. As linhas traceja
 | **Feedback**  | Comentários e notas por nó                                      |
 |               |                                                                 |
 
-#### Usuários
+#### 2.2.1 Usuários
 ```mermaid
 classDiagram
     class UserController {
         <<Microsserviço>>
-        +POST /api/user
-        +GET /api/user - lista de varios usuarios
-        +GET /api/user/[query] - somente um usuario
-        <<Integração>> Consultado pelo serviço de Equipes ()
+		+POST /api/user - cria usuário
+		+GET /api/user - lista com filtros ou, com codes, busca em lote [máx. 100]
+		+GET /api/user/code - um usuário [404 se não existir]
+		<<Integração>> Consultado em lote pelo serviço de Equipes ()
     }
 
     class User {
@@ -108,7 +108,8 @@ classDiagram
     UserController ..> User : gerencia entidade
 ```
 
-#### Equipes
+#### 2.2.2 Equipes
+
 ```mermaid
 classDiagram
     class TeamController {
@@ -116,8 +117,7 @@ classDiagram
         +POST /api/team
         +GET /api/team/code - dados dos membros no grupo
         +PATCH /api/team/code - atualiza membros no grupo
-
-        <> Busca dados de cada membro no serviço de Usuários ()
+        <<Integração>> Busca os membros em lote no serviço de Usuários, numa única chamada de até 100 códigos ()
     }
 
     class Team {
@@ -128,15 +128,31 @@ classDiagram
 
     class TeamMember {
         +string TeamCode FK
-        +string UserCode FK
-        +string Role
+        +string UserCode
+        +enum Role
+    }
+
+    class TeamRole {
+        <<enumeration>>
+        Admin
+        Owner
+        Collaborator
+        Evaluator
     }
 
     TeamController ..> Team : gerencia entidade
-    Team o-- TeamMember : 
+    Team o-- TeamMember
+    TeamMember --> TeamRole
 ```
 
-#### Ideias
+**Papéis dos membros:**
+- `Admin`: possui todas as permissões da equipe, podendo gerenciá-la integralmente.
+- `Owner`: proprietário da equipe, responsável por sua criação e administração.
+- `Collaborator`: pode contribuir com soluções e hipóteses.
+- `Evaluator`: pode comentar e avaliar ideias.
+
+
+#### 2.2.3 Ideias
 ```mermaid
 classDiagram
     class IdeaController {
@@ -147,7 +163,7 @@ classDiagram
         +PUT /api/idea/select/code
         +PUT /api/idea/validation/code
 
-        <> Consultado pelo Feedback e recebe validação de Hipóteses ()
+        <<Integração>> Consultado pelo Feedback e recebe validação de Hipóteses ()
     }
 
     class Link {
@@ -178,7 +194,7 @@ classDiagram
 
 
 
-#### Hipóteses
+#### 2.2.4 Hipóteses
 ```mermaid
 classDiagram
     class HypothesisController {
@@ -186,14 +202,14 @@ classDiagram
         +POST /api/hypothesis
         +GET /api/hypothesis?linkCode=code
         +PUT /api/hypothesis/result/code
-        <> ao registrar o resultado, chama o serviço de Ideias para atualizar a validação do nó/link()
+        <<Integração>> ao registrar o resultado, chama o serviço de Ideias para atualizar a validação do nó/link()
     }
 
     class Hypothesis {
         +string Code PK
         +string LinkCode FK
         +string Description
-        +string Success
+        +string SuccessCriteria
         +string Result
         +datetime CreationDate
     }
@@ -202,7 +218,7 @@ classDiagram
 ```
 
 
-#### Feedback
+#### 2.2.5 Feedback
 
 ```mermaid
 classDiagram
@@ -210,7 +226,7 @@ classDiagram
         <<Microsserviço>>
         +POST /api/feedbacks
         +GET /api/feedbacks?linkCode=code
-        <> *antes de salvar, consulta o serviço de Ideias para validar que o nó(Link) existe e está aberto ()
+        <<Integração>> antes de salvar, consulta o serviço de Ideias para validar que o nó(Link) existe e está aberto ()
     }
 
     class Feedback {
@@ -227,7 +243,7 @@ classDiagram
 
 
 
-#### API principal (gateway)
+#### 2.2.6 API principal (gateway)
 ```mermaid
 classDiagram
     class GatewayController {
@@ -248,13 +264,13 @@ As três integrações acontecem diretamente entre os microsserviços, sem passa
 
 | #   | Tipo               | Origem → Destino   | O que acontece                                                                                                                |
 | --- | ------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Busca de dados     | Equipes → Usuários | Ao exibir uma equipe, busca os dados de cada membro (`GET /api/user/{code}`)                                                  |
-| 2   | Busca de dados     | Feedback → Ideias  | Ao cadastrar um feedback, valida se o nó/link existe e está aberto (`GET /api/link/{code}`)                                   |
-| 3   | Alteração de dados | Hipóteses → Ideias | Ao registrar o resultado de uma hipótese, atualiza a validação do nó e grava no histórico (`PUT /api/link/validation/{code}`) |
+| 1   | Busca de dados     | Equipes → Usuários | Ao exibir uma equipe, envia numa única chamada os códigos de todos os membros e recebe os dados deles (`GET /api/user?codes=...`, máx. 100)                                                  |
+| 2   | Busca de dados     | Feedback → Ideias  | Ao cadastrar um feedback, valida se o nó/link existe e está aberto (`GET /api/idea/{code}`)                                   |
+| 3   | Alteração de dados | Hipóteses → Ideias | Ao registrar o resultado de uma hipótese, atualiza a validação do nó e grava no histórico (`PUT /api/idea/validation/{code}`) |
 
-A integração 3 pode evoluir para comunicação assíncrona: em vez de chamar Ideias diretamente, Hipóteses publica o evento `HypothesisResultRegistered` e Ideias o consome para atualizar a validação do nó/link e o histórico (detalhes em 6.1).
+A integração 3 pode evoluir para comunicação assíncrona: em vez de chamar Ideias diretamente, Hipóteses publica o evento `HypothesisResultRegistered` e Ideias o consome para atualizar a validação do nó/link e o histórico (detalhes em 7.1).
 
-#### 2.4 Ideia de UI
+#### 2.3.1 Ideia de UI
 
 ```mermaid
 flowchart TD
@@ -267,7 +283,16 @@ flowchart TD
 ```
 
 
-## 3. Trabalhos relacionados e diferencial
+## 3 Arquitetura
+### 3.1 Persistência de dados: Dapper
+
+Escolhemos o **Dapper** para realizar o acesso aos bancos de dados, permitindo escrever consultas SQL diretamente e mapear os resultados para objetos.
+
+Cada microserviço terá seu próprio banco SQLite, com acesso feito por Repositories e pela interface `IDatabaseConnection`.
+
+Essa estrutura facilita uma possível troca para PostgreSQL no futuro.
+
+## 4 Trabalhos relacionados e diferencial
 
 Já existem ferramentas e projetos que cobrem partes do Branchstorm:
 
@@ -279,24 +304,30 @@ Já existem ferramentas e projetos que cobrem partes do Branchstorm:
 
 ---
 
-## 4. Tecnologias
+## 5 Tecnologias
 
 - .NET (template de microsserviço da disciplina)
-- Angular (frontend para usuario)
+- Angular (frontend para o usuário)
 - SQLite (um banco por serviço)
+- Dapper (acesso a dados, com Repositories e `IDatabaseConnection`)
 - Padrão REST sobre HTTP
 - Servidor container Render
 
-## 5. Como executar
+## 6 Como executar
 
 ```bash
-A ver ainda
+# Serviço de Usuários
+cd UserServiceApi
+dotnet run
+# API em https://localhost:7153 (confira a porta em Properties/launchSettings.json)
 ```
 
-## 6. Extras e evolução futura
+Os demais serviços serão adicionados aqui conforme ficarem prontos.
+
+## 7 Extras e evolução futura
 
 
-### 6.1 Extras previstos
+### 7.1 Extras previstos
 
 - Integração com IA: 
 	- sugestão de problemas/ideias aleatórios para discussão em grupo 
@@ -307,11 +338,11 @@ A ver ainda
 - Observabilidade: logs estruturados e health checks em todos os serviços (provavelmente Swarmpit)
 	- acompanhar o evento da hipótese (publicado e consumido) nos logs, com um identificador de correlação
 
-### 6.2 Ideias/Recursos de evolução
+### 7.2 Ideias/Recursos de evolução
 
 - **Troca de perspectivas (brainstorm aleatório):** a plataforma sorteia pares de equipes. A equipe A lança um problema e a equipe B propõe as soluções; depois os papéis se invertem. Seria um novo serviço, **Desafios**, que cria o nó (Link) raiz na equipe A e designa a equipe B para responder, reaproveitando os serviços de Ideias e Equipes.
 - **Batalha de equipes:** várias equipes recebem o mesmo problema e cada uma desenvolve a própria árvore de soluções. No fim, os caminhos são comparados (hipóteses validadas, feedback recebido, profundidade da árvore).
 - **Fork de ideias** entre equipes e votação nos nós.
 - **Ranking de equipes** e modo relâmpago, com tempo limitado para propor soluções.
-- **Login simplificado** para agil uso com grandes grupos (com google ou outro)
+- **Login simplificado** para uso ágil com grandes grupos (com Google ou outro)
 - **Salas de discussão simplificadas** (estilo Kahoot)
