@@ -8,10 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.18.7" />
+    <PackageReference Include="Scalar.AspNetCore.Microsoft" Version="2.18.7" />
+    <PackageReference Include="Scalar.AspNetCore.Swashbuckle" Version="2.18.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Containers\" />
+    <ProjectReference Include="..\..\BranchstormInfrastructure\BranchstormDomain.csproj" />
+    <ProjectReference Include="..\IdeaServiceApiClassLibrary\IdeaApiClassLibrary.csproj" />
   </ItemGroup>
 
 </Project>
