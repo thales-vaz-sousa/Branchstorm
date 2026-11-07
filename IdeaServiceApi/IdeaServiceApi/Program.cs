@@ -1,21 +1,40 @@
+using BranchstormDomain.Infrastructure.Database;
+using IdeaApi.Containers;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddDependencyInjectionContainers();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddScalarTransformers();
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider
+        .GetRequiredService<DatabaseInitializer>();
+
+    var schemaPath = Path.Combine(
+        app.Environment.ContentRootPath,
+        "Database",
+        "schemaIdeas.sql"
+    );
+
+    await initializer.InitializeAsync(schemaPath);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
