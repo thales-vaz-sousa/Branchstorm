@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="../BranchstormInfrastructure/BranchstormDomain.csproj" />
+  <Project Path="../UserServiceApi/UserServiceApi/UserApi.csproj" />
   <Project Path="TeamServiceApi/TeamApi.csproj" />
   <Project Path="TeamServiceApiClassLibrary/TeamApiClassLibrary.csproj" />
 </Solution>

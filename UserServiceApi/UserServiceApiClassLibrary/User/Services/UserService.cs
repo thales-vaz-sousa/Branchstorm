@@ -1,4 +1,5 @@
 ﻿using BranchstormDomain.Domain;
+using BranchstormDomain.Util;
 using UserApiClassLibrary.User.Entities.Dtos;
 using UserApiClassLibrary.User.Entities.Queries;
 using UserApiClassLibrary.User.Entities.Results;
@@ -14,7 +15,7 @@ namespace UserApiClassLibrary.User.Services
         {
             userDto.ValidateDomain();
 
-            userDto.Code = UserDto.GenerateDeterministicGuid(userDto.Name, userDto.Email);
+            userDto.Code = DeterministicGuid.Generate(userDto);
 
             return await userRepository.CreateAsync(userDto);
         }
