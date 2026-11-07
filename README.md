@@ -56,17 +56,26 @@ Permitir que pessoas e equipes cadastrem problemas e/ou ideias, desenvolvam solu
 
 - Back-end com arquitetura de microsserviços, cada microserviço segue o template visto em sala: **.NET, SQLite e REST**. 
 - Frontend em Angular.
+- API principal (gateway): ponto de entrada único do back-end. O Angular só fala com ela, e ela chama os microsserviços.
 
 Cada serviço tem seu próprio banco e só conversa com os outros por HTTP no padrão REST.
 
+*Uma evolução do projeto para o banco de dados é migrar a arquitetura do banco unificado a um só em postgree com diferentes clientes aos serviços*
+
 ```mermaid
-flowchart LR
-  Equipes -- "GET usuário" --> Usuarios
-  Feedback -- "GET nó/link" --> Ideias
-  Hipoteses == "PUT validação do nó/link" ==> Ideias
+flowchart TD
+  Branchstorm_["Branchstorm (Frontend Angular)"] --> Gateway["Branchstorm API principal (gateway)"]
+  Gateway --> User_API
+  Gateway --> Team_API
+  Gateway --> Ideia_API
+  Gateway --> Hypotesis_API
+  Gateway --> Feedback_API
+  Team_API -. "GET usuário" .-> User_API
+  Feedback_API -. "GET nó/link" .-> Ideia_API
+  Hypotesis_API == "PUT validação do nó/link" ==> Ideia_API
 ```
 
-Linhas finas são buscas de dados; a linha grossa é a alteração de dados entre serviços.
+As setas sólidas finas saem do gateway, que atende o Angular. As linhas tracejadas são buscas de dados entre serviços; a linha grossa é a alteração de dados entre serviços.
 
 ### 2.2 Microsserviços
 
@@ -218,13 +227,33 @@ classDiagram
 
 
 
+#### API principal (gateway)
+```mermaid
+classDiagram
+    class GatewayController {
+        <<API principal>>
+        +/api/user - encaminha para Usuários
+        +/api/team - encaminha para Equipes
+        +/api/idea - encaminha para Ideias
+        +/api/hypothesis - encaminha para Hipóteses
+        +/api/feedbacks - encaminha para Feedback
+        <<Integração>> Único ponto de acesso do Angular. As integrações entre serviços não passam por ele ()
+    }
+```
+
+
 ### 2.3 Integrações entre microsserviços
+
+As três integrações acontecem diretamente entre os microsserviços, sem passar pela API principal (gateway). O gateway só atende o Angular.
 
 | #   | Tipo               | Origem → Destino   | O que acontece                                                                                                                |
 | --- | ------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | 1   | Busca de dados     | Equipes → Usuários | Ao exibir uma equipe, busca os dados de cada membro (`GET /api/user/{code}`)                                                  |
 | 2   | Busca de dados     | Feedback → Ideias  | Ao cadastrar um feedback, valida se o nó/link existe e está aberto (`GET /api/link/{code}`)                                   |
 | 3   | Alteração de dados | Hipóteses → Ideias | Ao registrar o resultado de uma hipótese, atualiza a validação do nó e grava no histórico (`PUT /api/link/validation/{code}`) |
+
+A integração 3 pode evoluir para comunicação assíncrona: em vez de chamar Ideias diretamente, Hipóteses publica o evento `HypothesisResultRegistered` e Ideias o consome para atualizar a validação do nó/link e o histórico (detalhes em 6.1).
+
 #### 2.4 Ideia de UI
 
 ```mermaid
@@ -272,8 +301,11 @@ A ver ainda
 - Integração com IA: 
 	- sugestão de problemas/ideias aleatórios para discussão em grupo 
 	- resumir os feedbacks de um nó (*link*) e sugerir hipóteses a partir da descrição.
-- Comunicação assíncrona na integração Hipóteses → Ideias (mensageria).
+- Comunicação assíncrona na integração Hipóteses → Ideias (mensageria):
+	- em vez de chamar Ideias diretamente, Hipóteses publica o evento `HypothesisResultRegistered` ao registrar o resultado
+	- Ideias consome o evento e atualiza a validação do nó/link e o histórico, mesmo que estivesse fora do ar no momento do registro
 - Observabilidade: logs estruturados e health checks em todos os serviços (provavelmente Swarmpit)
+	- acompanhar o evento da hipótese (publicado e consumido) nos logs, com um identificador de correlação
 
 ### 6.2 Ideias/Recursos de evolução
 

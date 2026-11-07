@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Feedback\Repositories\Entities\Dtos\" />
+    <Folder Include="Feedback\Repositories\Entities\Results\" />
+    <Folder Include="Feedback\Repositories\Entities\Queries\" />
+    <Folder Include="Feedback\Services\" />
+  </ItemGroup>
+
 </Project>
