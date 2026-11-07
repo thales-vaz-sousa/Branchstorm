@@ -15,21 +15,22 @@ namespace UserServiceApi.Controllers
         private readonly IUserService userService = userService;
 
         [HttpPost]
-        public IActionResult CreateUser([FromBody] UserDto userDto)
+        public async Task<ActionResult<UserResult>> CreateUser([FromBody] UserDto userDto)
         {
-            return Ok(userService.CreateAsync(userDto));
+            return Ok(await userService.CreateAsync(userDto));
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<UserResult>> Find()
+        public async Task<ActionResult<IEnumerable<UserResult>>> Find([FromQuery] FindUsersQuery query)
         {
-            return Ok(userService.FindAsync());
+            return Ok(await userService.FindAsync(query));
         }
 
-        [HttpGet("search")]
-        public IActionResult FindOne([FromQuery] FindUserQuery query)
+        [HttpGet("{code}")]
+        public async Task<ActionResult<UserResult>> FindOne(string code)
         {
-            return Ok(userService.FindOneAsync(query));
+            UserResult? user = await userService.FindOneAsync(code);
+            return user is null ? NotFound() : Ok(user);
         }
     }
 }

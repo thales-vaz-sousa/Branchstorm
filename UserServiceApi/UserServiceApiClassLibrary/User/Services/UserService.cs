@@ -1,4 +1,5 @@
-﻿using UserApiClassLibrary.User.Entities.Dtos;
+﻿using BranchstormDomain.Domain;
+using UserApiClassLibrary.User.Entities.Dtos;
 using UserApiClassLibrary.User.Entities.Queries;
 using UserApiClassLibrary.User.Entities.Results;
 using UserApiClassLibrary.User.Repositories;
@@ -9,19 +10,32 @@ namespace UserApiClassLibrary.User.Services
         IUserRepository userRepository
         ) : IUserService
     {
-        public Task CreateAsync(UserDto userDto)
+        public async Task<UserResult> CreateAsync(UserDto userDto)
         {
-            return userRepository.CreateAsync(userDto);
+            userDto.ValidateDomain();
+
+            userDto.Code = UserDto.GenerateDeterministicGuid(userDto.Name, userDto.Email);
+
+            return await userRepository.CreateAsync(userDto);
         }
 
-        public Task<IEnumerable<UserResult>> FindAsync()
+        public Task<IEnumerable<UserResult>> FindAsync(FindUsersQuery query)
         {
-            return userRepository.FindAsync();
+            query.ValidateDomain();
+
+            query = query with { Codes = query.Codes?.Distinct().ToArray() };
+
+            return userRepository.FindAsync(query);
         }
 
-        public Task<UserResult> FindOneAsync(FindUserQuery query)
+        public Task<UserResult?> FindOneAsync(string code)
         {
-            return userRepository.FindOneAsync(query);
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentException("Code cannot be null or empty.", nameof(code));
+            }
+
+            return userRepository.FindOneAsync(code);
         }
     }
 }

@@ -6,8 +6,8 @@ namespace UserApiClassLibrary.User.Repositories
 {
     public interface IUserRepository
     {
-        Task CreateAsync(UserDto userDto);
-        Task<UserResult> FindOneAsync(FindUserQuery query);
-        Task<IEnumerable<UserResult>> FindAsync();
+        Task<UserResult> CreateAsync(UserDto userDto);
+        Task<IEnumerable<UserResult>> FindAsync(FindUsersQuery query);
+        Task<UserResult?> FindOneAsync(string code);
     }
 }

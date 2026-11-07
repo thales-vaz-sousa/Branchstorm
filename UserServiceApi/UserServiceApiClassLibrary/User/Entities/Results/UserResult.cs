@@ -2,7 +2,8 @@
 {
     public record UserResult
     {
-        public Guid Code { get; init; }
+        public string Code { get; init; }
         public string Name { get; init; }
+        public string Email { get; init; }
     }
 }

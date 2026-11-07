@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="../BranchstormInfrastructure/BranchstormDomain.csproj" Id="43837114-3622-476d-8b76-ac587c8ffaaa" />
   <Project Path="UserServiceApi/UserApi.csproj" />
   <Project Path="UserServiceApiClassLibrary/UserApiClassLibrary.csproj" />
 </Solution>
