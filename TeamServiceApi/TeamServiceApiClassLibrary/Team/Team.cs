@@ -9,8 +9,16 @@
 
     public class TeamMember
     {
-        public string TeamCode { get; set; }
+        public string? TeamCode { get; set; }
         public string UserCode { get; set; }
-        public string Role { get; set; }
+        public TeamMemberRole Role { get; set; }
+    }
+
+    public enum TeamMemberRole
+    {
+        Admin,
+        Owner,
+        Collaborator,
+        Evaluator
     }
 }

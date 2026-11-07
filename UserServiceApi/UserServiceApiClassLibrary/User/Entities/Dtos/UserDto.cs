@@ -23,14 +23,5 @@ namespace UserApiClassLibrary.User.Entities.Dtos
             Email = email;
 
         }
-
-        public static Guid GenerateDeterministicGuid(string name, string email)
-        {
-            string input = $"{name.ToLower().Trim()}_{email.ToLower().Trim()}";
-            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-            byte[] hashBytes = MD5.HashData(inputBytes);
-            return new Guid(hashBytes);
-        }
-
     }
 }

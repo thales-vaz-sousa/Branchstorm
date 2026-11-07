@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BranchstormInfrastructure\BranchstormDomain.csproj" />
     <ProjectReference Include="..\TeamServiceApiClassLibrary\TeamApiClassLibrary.csproj" />
   </ItemGroup>
 

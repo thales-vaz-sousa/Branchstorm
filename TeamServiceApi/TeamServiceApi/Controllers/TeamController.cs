@@ -1,30 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
 using TeamApiClassLibrary.Team.Entities.Dtos;
+using TeamApiClassLibrary.Team.Entities.Results;
+using TeamApiClassLibrary.Team.Services;
 
 namespace TeamServiceApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TeamController : ControllerBase
+    public class TeamController(
+        ITeamService teamService
+        ) : ControllerBase
     {
+        private readonly ITeamService teamService = teamService;
 
         [HttpPost]
-        public IActionResult CreateTeam([FromBody] TeamDto createTeamDto)
+        public async Task<ActionResult<TeamResult>> CreateTeam([FromBody] TeamDto teamDto)
         {
-            
-            return Ok();
+            return Ok(await teamService.CreateAsync(teamDto));
         }
 
         [HttpGet("{code}")]
-        public IActionResult FindTeam ([FromRoute] string code)
+        public async Task<ActionResult<TeamResult>> FindTeam([FromRoute] string code)
         {
-            return Ok();
+            TeamResult? team = await teamService.FindOneAsync(code);
+            return team is null ? NotFound() : Ok(team);
         }
 
         [HttpPatch("{code}")]
-        public IActionResult UpdateTeamMembers([FromBody] TeamDto teamDto)
+        public async Task<ActionResult<TeamResult>> UpdateTeamMembers([FromRoute] string code, [FromBody] TeamDto teamDto)
         {
-            return Ok();
+            return Ok(await teamService.UpdateMembersAsync(code, teamDto));
         }
     }
 }

@@ -129,10 +129,10 @@ classDiagram
     class TeamMember {
         +string TeamCode FK
         +string UserCode
-        +enum Role
+        +TeamMemberRole Role
     }
 
-    class TeamRole {
+    class TeamMemberRole {
         <<enumeration>>
         Admin
         Owner
@@ -142,7 +142,7 @@ classDiagram
 
     TeamController ..> Team : gerencia entidade
     Team o-- TeamMember
-    TeamMember --> TeamRole
+    TeamMember --> TeamMemberRole
 ```
 
 **Papéis dos membros:**
