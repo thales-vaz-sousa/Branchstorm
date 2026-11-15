@@ -27,21 +27,21 @@ Permitir que pessoas e equipes cadastrem problemas e/ou ideias, desenvolvam solu
 
 ### 1.3 Requisitos funcionais
 
-| Código | Requisito                                                                                            |
-| ------ | ---------------------------------------------------------------------------------------------------- |
-| RF01   | Cadastrar, consultar e listar usuários                                                               |
-| RF02   | Criar equipes e adicionar/remover membros com um papel (administrador, dono, colaborador, avaliador) |
-| RF03   | Cadastrar um problema/ideia raiz                                                                     |
-| RF04   | Propor soluções e novas versões como filhos de um nó (link) da árvore, informando o motivo           |
-| RF05   | Selecionar um nó (os irmãos viram descartados) e marcar um nó como solução final                     |
-| RF06   | Consultar a árvore completa de uma ideia, incluindo nós descartados                                  |
-| RF07   | Cadastrar hipóteses em um nó (link), com critério de sucesso                                         |
-| RF08   | Registrar o resultado de uma hipótese (validada ou refutada)                                         |
-| RF09   | Atualizar automaticamente a validação do nó a partir do resultado da hipótese                        |
-| RF10   | Comentar e dar nota em um nó (link), apenas se ele estiver aberto a feedback                         |
-| RF11   | Listar os feedbacks de um nó (link)                                                                  |
-|        |                                                                                                      |
-
+| Código | Requisito                                                                                                                                                                        |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RF01   | Cadastrar, consultar e listar usuários                                                                                                                                           |
+| RF02   | Criar equipes e adicionar/remover membros com um papel (administrador, dono, colaborador, avaliador)                                                                             |
+| RF03   | Cadastrar um problema/ideia raiz                                                                                                                                                 |
+| RF04   | Propor soluções e novas versões como filhos de um nó (link) da árvore, informando o motivo                                                                                       |
+| RF05   | Selecionar um nó (os irmãos viram descartados) e marcar um nó como solução final                                                                                                 |
+| RF06   | Consultar a árvore completa de uma ideia, incluindo nós descartados                                                                                                              |
+| RF07   | Cadastrar hipóteses em um nó (link), com critério de sucesso                                                                                                                     |
+| RF08   | Registrar o resultado de uma hipótese (validada ou refutada)                                                                                                                     |
+| RF09   | Atualizar automaticamente a validação do nó a partir do resultado da hipótese                                                                                                    |
+| RF10   | Comentar e dar nota em um nó (link), apenas se ele estiver aberto a feedback                                                                                                     |
+| RF11   | Listar os feedbacks de um nó (link)                                                                                                                                              |
+| RF12   | Exportar a árvore (inteira, só o caminho selecionado ou um nó e seus descendentes) em Markdown, CSV e Mermaid, com opção de incluir descartados, histórico, hipóteses e feedback |
+| RF13   | Usar modelos de problema e perfis de vocabulário (software, tickets, decisões e outros), sem alterar as regras de negócio                                                        |
 ### 1.4 Regras de negócio principais
 
 - Nós (links) descartados nunca são apagados, só mudam de status.
@@ -202,6 +202,7 @@ classDiagram
         +POST /api/hypothesis
         +GET /api/hypothesis?linkCode=code
         +PUT /api/hypothesis/result/code
+        +GET /api/hypothesis?linkCodes=code&linkCodes=code - vários nós de uma vez [máx. 100]
         <<Integração>> ao registrar o resultado, chama o serviço de Ideias para atualizar a validação do nó/link()
     }
 
@@ -226,6 +227,7 @@ classDiagram
         <<Microsserviço>>
         +POST /api/feedbacks
         +GET /api/feedbacks?linkCode=code
+        +GET /api/feedbacks?linkCodes=code&linkCodes=code - vários nós de uma vez [máx. 100]
         <<Integração>> antes de salvar, consulta o serviço de Ideias para validar que o nó(Link) existe e está aberto ()
     }
 
@@ -233,7 +235,7 @@ classDiagram
         +string Code PK
         +string LinkCode FK
         +string AutorCode FK
-        +string Test
+        +string Text
         +number Rating
         +datetime CreationDate
     }
@@ -253,6 +255,8 @@ classDiagram
         +/api/idea - encaminha para Ideias
         +/api/hypothesis - encaminha para Hipóteses
         +/api/feedbacks - encaminha para Feedback
+        +GET /api/export/code - árvore, hipóteses, feedbacks e autores juntos [somente leitura]
+
         <<Integração>> Único ponto de acesso do Angular. As integrações entre serviços não passam por ele ()
     }
 ```
@@ -260,7 +264,9 @@ classDiagram
 
 ### 2.3 Integrações entre microsserviços
 
-As três integrações acontecem diretamente entre os microsserviços, sem passar pela API principal (gateway). O gateway só atende o Angular.
+As três integrações acontecem diretamente entre os microsserviços, sem passar pela API principal (gateway). O gateway só atende o Angular. 
+
+**Nota:** *A agregação de leitura que ele faz para a exportação (`GET /api/export/{code}`) não conta como integração entre microsserviços.*
 
 | #   | Tipo               | Origem → Destino   | O que acontece                                                                                                                |
 | --- | ------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -280,6 +286,59 @@ flowchart TD
   A --> A1["Versão A1 (selecionada)"]
   A --> A2["Versão A2 (descartada)"]
   A1 --> F["Solução/Ramificação final"]
+```
+
+### 2.4 Perfis de uso, modelos de problema e exportação
+
+O Branchstorm não serve só para decisões de arquitetura de software. O modelo (problema → solução → versão, com hipóteses e feedback) é genérico, e o que muda de uma área para outra é a interpretação. Por isso os **perfis de uso** e os **modelos de problema** são recursos meramente de apresentação do frontend: não alteram regras de negócio, endpoints nem entidades. Os dados continuam sendo `problem`, `solution` e `version`.
+#### 2.4.1 Perfis de uso
+
+| Perfil                | Problema | Solução           | Versão      | Hipótese      | Feedback   |
+| --------------------- | -------- | ----------------- | ----------- | ------------- | ---------- |
+| Software (padrão)     | Problema | Solução           | Versão      | Hipótese      | Feedback   |
+| Tickets e incidentes  | Ticket   | Solução proposta  | Ajuste      | Verificação   | Resultado  |
+| Decisões              | Decisão  | Opção             | Variante    | Teste         | Comentário |
+| Pesquisa e estudo     | Pergunta | Resposta possível | Refinamento | Hipótese      | Revisão    |
+| Ensino                | Desafio  | Estratégia        | Adaptação   | Teste em sala | Observação |
+| Melhoria de processos | Problema | Ação              | Padrão      | Piloto        | Resultado  |
+
+#### 2.4.2 Modelos de problema
+
+Ao criar um problema, a pessoa pode escolher um modelo. Ele preenche a descrição com seções fixas em Markdown, e a exportação reconhece essas seções. Exemplo, no perfil Tickets e incidentes:
+
+##### *De onde vem o problema*
+##### *Resultado esperado*
+##### *Como solucionar*
+
+
+#### 2.4.3 Exportação
+
+- **Escopo:** árvore inteira, só o caminho selecionado, ou um nó e seus descendentes.
+- **Conteúdo opcional:** nós descartados, histórico, hipóteses, comentários e notas. Se o feedback for desmarcado, a seção "Feedback" sai em branco, para ser preenchida depois.
+- **Formatos:** Markdown, copiar como texto, CSV e Mermaid (evoluções futuras: PDF, imagem, Word e JSON).
+- **Como funciona:** 
+	- a geração acontece no frontend, a partir dos dados da árvore. Para incluir hipóteses e feedback de muitos nós, o gateway oferece `GET /api/export/{code}`, somente leitura, que usa as consultas em lote (`linkCodes`, máx. 100) de Hipóteses e Feedback e a consulta em lote de Usuários (nomes dos autores).
+
+**Nota:** *Exportar nunca altera dados.*
+
+Exemplo de saída em Markdown:
+
+```md
+# Reduzir o desperdício no refeitório
+
+## De onde vem o problema
+Estudantes deixam comida no prato porque não conhecem o cardápio do dia.
+
+## Resultado esperado
+Que a pessoa escolha com antecedência e não sobre comida.
+
+## Como solucionar
+- Solução escolhida: Aplicativo de reserva de refeições
+  - Versão final: Reserva com 1 dia de antecedência (hipótese validada)
+- Descartadas: Porções menores, Doação das sobras
+
+## Feedback
+(preencher)
 ```
 
 
@@ -326,23 +385,43 @@ Os demais serviços serão adicionados aqui conforme ficarem prontos.
 
 ## 7 Extras e evolução futura
 
-
 ### 7.1 Extras previstos
 
 - Integração com IA: 
+	- camada/serviço de MCP (Model Context Protocol) para connectors/extensões de modelos existentes
 	- sugestão de problemas/ideias aleatórios para discussão em grupo 
 	- resumir os feedbacks de um nó (*link*) e sugerir hipóteses a partir da descrição.
 - Comunicação assíncrona na integração Hipóteses → Ideias (mensageria):
 	- em vez de chamar Ideias diretamente, Hipóteses publica o evento `HypothesisResultRegistered` ao registrar o resultado
 	- Ideias consome o evento e atualiza a validação do nó/link e o histórico, mesmo que estivesse fora do ar no momento do registro
-- Observabilidade: logs estruturados e health checks em todos os serviços (provavelmente Swarmpit)
+- Observabilidade: logs estruturados e health checks em todos os serviços (provavelmente Swarmpit para o UI desse recurso)
 	- acompanhar o evento da hipótese (publicado e consumido) nos logs, com um identificador de correlação
+	- logs de cada chamada entre serviços
 
 ### 7.2 Ideias/Recursos de evolução
 
-- **Troca de perspectivas (brainstorm aleatório):** a plataforma sorteia pares de equipes. A equipe A lança um problema e a equipe B propõe as soluções; depois os papéis se invertem. Seria um novo serviço, **Desafios**, que cria o nó (Link) raiz na equipe A e designa a equipe B para responder, reaproveitando os serviços de Ideias e Equipes.
+- **Troca de perspectivas (brainstorm aleatório):** a plataforma sorteia pares de equipes. A equipe *A* lança um problema e a equipe *B* propõe as soluções; depois os papéis se invertem. Seria um novo serviço, **Desafios**, que cria o nó (Link) raiz na equipe *A* e designa a equipe *B* para responder, reaproveitando os serviços de Ideias e Equipes.
 - **Batalha de equipes:** várias equipes recebem o mesmo problema e cada uma desenvolve a própria árvore de soluções. No fim, os caminhos são comparados (hipóteses validadas, feedback recebido, profundidade da árvore).
 - **Fork de ideias** entre equipes e votação nos nós.
 - **Ranking de equipes** e modo relâmpago, com tempo limitado para propor soluções.
 - **Login simplificado** para uso ágil com grandes grupos (com Google ou outro)
 - **Salas de discussão simplificadas** (estilo Kahoot)
+
+---
+
+## 8 Frontend (BrainstormUI)
+
+O frontend em Angular fica em um diretório à parte que é compartilhado somente com permissão da equipe e cobre os requisitos RF01–RF13: pessoas, equipes e papéis, árvore de ideias, soluções e versões, seleção e solução final, hipóteses, validação automática, feedback e notas. Assim como exportação da árvore de decisões. 
+
+### 8.1 Stack
+
+- Angular 22 standalone, signals e change detection com **zoneless**
+- Componentes próprios em SCSS, com Angular CDK para o comportamento
+- `d3-hierarchy` para o cálculo do layout da árvore, com SVG + HTML próprios e formatação de grid.
+- SCSS com tokens da identidade Branchstorm.
+- Vitest para testes unitários recorrentes em alterações e ESLint/Prettier para qualidade de código
+### 8.2 Documentação
+
+A documentação técnica (visão geral, arquitetura, requisitos RF01–RF11, camadas do frontend,
+contrato da API e modo demonstração) fica no repositório do UI e também é publicada como um site Docusaurus (que será disponibilizado no próprio website).
+
