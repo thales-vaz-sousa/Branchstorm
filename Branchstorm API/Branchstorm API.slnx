@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="../BranchstormInfrastructure/BranchstormDomain.csproj" />
   <Project Path="BranchstormApiClient/BranchstormApiClient.csproj" />
   <Project Path="BranchstormApiClientClassLibrary/BranchstormApiClientClassLibrary.csproj" />
 </Solution>

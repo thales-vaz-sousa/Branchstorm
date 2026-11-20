@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\Dtos\" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BranchstormInfrastructure\BranchstormDomain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Entities\Queries\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
