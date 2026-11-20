@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using IdeaApiClassLibrary.Link.Entities;
 
 namespace IdeaApiClassLibrary.Link.Entities.Dtos
 {

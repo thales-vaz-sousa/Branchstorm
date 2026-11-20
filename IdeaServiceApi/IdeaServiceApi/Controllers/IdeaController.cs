@@ -29,7 +29,7 @@ namespace IdeaServiceApi.Controllers
         [HttpGet("tree/{code}")]
         public async Task<ActionResult<IEnumerable<LinkResult>>> FindTree([FromRoute] string code)
         {
-            var tree = await linkService.FindTreeAsync(code);
+            IEnumerable<LinkResult> tree = await linkService.FindTreeAsync(code);
             return tree.Any() ? Ok(tree) : NotFound();
         }
 

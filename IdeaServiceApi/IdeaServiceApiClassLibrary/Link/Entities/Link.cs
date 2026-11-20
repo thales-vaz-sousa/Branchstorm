@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using BranchstormDomain.Util;
+
 namespace IdeaApiClassLibrary.Link.Entities
 {
     public class Link
@@ -23,6 +26,7 @@ namespace IdeaApiClassLibrary.Link.Entities
         public DateTime CreationDate { get; set; }
     }
 
+    [JsonConverter(typeof(SnakeCaseLowerEnumConverter))]
     public enum LinkType
     {
         Problem,
@@ -38,6 +42,7 @@ namespace IdeaApiClassLibrary.Link.Entities
         Final
     }
 
+    [JsonConverter(typeof(SnakeCaseLowerEnumConverter))]
     public enum LinkValidation
     {
         NotTested,
