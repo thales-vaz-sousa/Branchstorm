@@ -39,6 +39,20 @@ ScaffoldingReadMe.txt
 # dotenv environment variables file
 .env
 
+# IDE
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
 # Others
 ~$*
 *~
