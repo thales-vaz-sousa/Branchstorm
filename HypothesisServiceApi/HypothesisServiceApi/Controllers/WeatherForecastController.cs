@@ -1,26 +1,42 @@
+using HypothesisServiceApi.Hypothesis;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HypothesisServiceApi.Controllers
-{
-    [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
-    {
-        private static readonly string[] Summaries =
-        [
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        ];
+namespace HypothesisServiceApi.Controllers;
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
-        }
+[ApiController]
+[Route("api/[controller]")]
+public sealed class HypothesisController(
+    IHypothesisService hypothesisService) : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromBody] CreateHypothesisRequest request)
+    {
+        var hypothesis = await hypothesisService.CreateAsync(request);
+
+        return CreatedAtAction(
+            nameof(FindByLink),
+            new { linkCode = hypothesis.LinkCode },
+            hypothesis);
+    }
+
+    [HttpGet("link/{linkCode:guid}")]
+    public async Task<IActionResult> FindByLink(Guid linkCode)
+    {
+        var hypotheses =
+            await hypothesisService.FindByLinkCodeAsync(linkCode);
+
+        return Ok(hypotheses);
+    }
+
+    [HttpPut("{code:guid}/result")]
+    public async Task<IActionResult> RegisterResult(
+        Guid code,
+        [FromBody] RegisterHypothesisResultRequest request)
+    {
+        var hypothesis =
+            await hypothesisService.RegisterResultAsync(code, request);
+
+        return hypothesis is null ? NotFound() : Ok(hypothesis);
     }
 }
