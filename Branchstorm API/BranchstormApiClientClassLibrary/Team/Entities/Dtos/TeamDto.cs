@@ -11,6 +11,9 @@ public class TeamDto
     [Required]
     public string Name { get; init; } = string.Empty;
 
+    [Required]
+    public string Description { get; init; } = string.Empty;
+
     public IEnumerable<TeamMember> Members { get; init; } = [];
 }
 

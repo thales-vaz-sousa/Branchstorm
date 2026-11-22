@@ -12,26 +12,39 @@ public class FeedbackApiService(HttpClient httpClient) : IFeedbackApiService
     public async Task<FeedbackResult?> CreateAsync(FeedbackDto feedbackDto)
     {
         using HttpResponseMessage response = await httpClient.PostAsJsonAsync("api/feedbacks", feedbackDto);
-        if (response.StatusCode is HttpStatusCode.NotFound) return null;
-
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<FeedbackResult>();
+        return await ReadOneAsync(response);
     }
 
     public async Task<IEnumerable<FeedbackResult>> FindByLinkAsync(string linkCode)
     {
-        using HttpResponseMessage response = await httpClient.GetAsync($"api/feedbacks?linkCode={Uri.EscapeDataString(linkCode)}");
-        if (!response.IsSuccessStatusCode) return [];
-
-        return await response.Content.ReadFromJsonAsync<IEnumerable<FeedbackResult>>() ?? [];
+        using HttpResponseMessage response = await httpClient.GetAsync($"api/feedbacks/{linkCode}");
+        var result = await ReadOneAsync(response);
+        return result is not null ? [result] : [];
     }
 
     public async Task<IEnumerable<FeedbackResult>> FindByLinksAsync(IEnumerable<string> linkCodes)
     {
-        string query = string.Join("&", linkCodes.Select(code => $"linkCodes={Uri.EscapeDataString(code)}"));
+        string query = string.Join("&", linkCodes.Select(code => $"LinkCodes={code}"));
         using HttpResponseMessage response = await httpClient.GetAsync($"api/feedbacks?{query}");
-        if (!response.IsSuccessStatusCode) return [];
 
-        return await response.Content.ReadFromJsonAsync<IEnumerable<FeedbackResult>>() ?? [];
+        response.EnsureSuccessStatusCode();
+
+        IEnumerable<FeedbackResult> result =
+            await response.Content.ReadFromJsonAsync<IEnumerable<FeedbackResult>>() ?? [];
+
+        return result;
+    }
+
+    private static async Task<FeedbackResult?> ReadOneAsync(HttpResponseMessage response)
+    {
+        FeedbackResult? result = null;
+
+        if (response.StatusCode is not HttpStatusCode.NotFound)
+        {
+            response.EnsureSuccessStatusCode();
+            result = await response.Content.ReadFromJsonAsync<FeedbackResult>();
+        }
+
+        return result;
     }
 }
