@@ -1,9 +1,12 @@
-﻿namespace TeamApiClassLibrary.Team
+﻿using System.Text.Json.Serialization;
+
+namespace TeamApiClassLibrary.Team
 {
     public class Team
     {
         public string Code { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public IEnumerable<TeamMember> Members { get; set; }
     }
 
@@ -14,11 +17,12 @@
         public TeamMemberRole Role { get; set; }
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum TeamMemberRole
     {
-        Admin,
-        Owner,
-        Collaborator,
-        Evaluator
+        Admin = 0,
+        Owner = 1,
+        Collaborator = 2,
+        Evaluator = 3
     }
 }

@@ -14,11 +14,13 @@ namespace TeamApiClassLibrary.Team.Repositories
         private const string CreateTeamSql = @"
             INSERT INTO Teams (
                 Code,
-                Name
+                Name,
+                Description
             )
             VALUES (
                 @Code,
-                @Name
+                @Name,
+                @Description
             );
         ";
 
@@ -43,7 +45,8 @@ namespace TeamApiClassLibrary.Team.Repositories
         private const string FindTeamSql = @"
             SELECT
                 Code,
-                Name
+                Name,
+                Description
             FROM
                 Teams
             WHERE
