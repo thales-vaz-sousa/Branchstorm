@@ -1,26 +1,40 @@
+using FeedbackApiClassLibrary.Feedback.Entities.Dtos;
+using FeedbackApiClassLibrary.Feedback.Entities.Queries;
+using FeedbackApiClassLibrary.Feedback.Entities.Results;
+using FeedbackApiClassLibrary.Feedback.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FeedbackApi.Controllers
-{
-    [ApiController]
-    [Route("[controller]")]
-    public class FeedbackController : ControllerBase
-    {
-        private static readonly string[] Summaries =
-        [
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        ];
+namespace FeedbackApi.Controllers;
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
-        }
+[ApiController]
+[Route("api/feedbacks")]
+public class FeedbackController(IFeedbackService feedbackService) : ControllerBase
+{
+    [HttpPost]
+    public async Task<ActionResult<FeedbackResult>> CreateFeedback([FromBody] FeedbackDto feedbackDto)
+    {
+        FeedbackResult feedback = await feedbackService.CreateAsync(feedbackDto);
+        return Ok(feedback);
     }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<FeedbackResult>>> Find([FromQuery] FindFeedbacksQuery query)
+    {
+        IEnumerable<FeedbackResult> feedbacks = await feedbackService.FindAsync(query);
+        return Ok(feedbacks);
+    }
+
+    [HttpGet("{linkCode}")]
+    public async Task<ActionResult<FeedbackResult>> FindOne([FromRoute] string linkCode)
+    {
+        FindFeedbackQuery query = new ()
+        {
+            LinkCode = linkCode
+        };
+
+        FeedbackResult feedback = await feedbackService.FindOneAsync(query);
+        return Ok(feedback);
+    }
+
 }
+

@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS Feedbacks (
+	Code TEXT PRIMARY KEY,
+	LinkCode TEXT NOT NULL,
+	AutorCode TEXT NOT NULL,
+	Text TEXT NOT NULL,
+	Rating REAL NOT NULL,
+	CreationDate TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS IX_Feedbacks_LinkCode
+ON Feedbacks (LinkCode);
