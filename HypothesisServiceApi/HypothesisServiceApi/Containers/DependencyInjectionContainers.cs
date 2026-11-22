@@ -1,14 +1,20 @@
-﻿using HypothesisServiceApi.Hypothesis;
+using BranchstormDomain.Infrastructure.Database;
+using BranchstormDomain.Infrastructure.Database.SqLite;
+using HypothesisServiceApi.Hypothesis.Repositories;
+using HypothesisServiceApi.Hypothesis.Services;
 
 namespace HypothesisServiceApi.Containers;
 
 public static class DependencyInjectionContainers
 {
-    public static IServiceCollection AddHypothesisServices(
+    public static IServiceCollection AddDependencyInjectionContainers(
         this IServiceCollection services)
     {
-        services.AddSingleton<IHypothesisRepository, InMemoryHypothesisRepository>();
-        services.AddScoped<IHypothesisService, HypothesisService>();
+        services.AddSingleton<IDatabaseConnection, SqliteConnectionFactory>();
+        services.AddScoped<DatabaseInitializer>();
+
+        services.UseHypothesisService();
+        services.UseHypothesisRepository();
 
         return services;
     }
