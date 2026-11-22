@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="FeedbackApi/FeedbackApi.csproj" />
   <Project Path="FeedbackApiClassLibrary/FeedbackApiClassLibrary.csproj" />
+  <Project Path="../BranchstormInfrastructure/BranchstormDomain.csproj" />
 </Solution>

@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.18.7" />
+    <PackageReference Include="Scalar.AspNetCore.Microsoft" Version="2.18.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BranchstormInfrastructure\BranchstormDomain.csproj" />
+    <ProjectReference Include="..\FeedbackApiClassLibrary\FeedbackApiClassLibrary.csproj" />
   </ItemGroup>
 
 </Project>
