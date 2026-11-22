@@ -11,7 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Containers\" />
+    <ProjectReference Include="..\..\BranchstormInfrastructure\BranchstormDomain.csproj" />
+    <ProjectReference Include="..\HypothesisServiceApiClassLibrary\HypothesisServiceApiClassLibrary.csproj" />
   </ItemGroup>
 
 </Project>
