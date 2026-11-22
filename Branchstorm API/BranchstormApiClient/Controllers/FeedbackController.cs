@@ -18,24 +18,27 @@ public class FeedbackController(IFeedbackService feedbackService) : ControllerBa
         return feedback is null ? NotFound() : Ok(feedback);
     }
 
+    [HttpGet("{linkCode}")]
+    public async Task<ActionResult<FeedbackResult>> FindOne([FromRoute] string linkCode)
+    {
+        IEnumerable<FeedbackResult> feedbacks = await feedbackService.FindByLinkAsync(linkCode);
+        FeedbackResult? feedback = feedbacks.FirstOrDefault();
+        return feedback is null ? NotFound() : Ok(feedback);
+    }
+
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<FeedbackResult>>> Find([FromQuery] string? linkCode,[FromQuery] string[]? linkCodes)
+    public async Task<ActionResult<IEnumerable<FeedbackResult>>> Find([FromQuery] string[]? linkCodes)
     {
         ActionResult<IEnumerable<FeedbackResult>> result;
 
-        if (!string.IsNullOrWhiteSpace(linkCode))
-        {
-            IEnumerable<FeedbackResult> feedback = await feedbackService.FindByLinkAsync(linkCode);
-            result = Ok(feedback);
-        }
-        else if (linkCodes is not null && linkCodes.Length > 0)
+        if (linkCodes is not null && linkCodes.Length > 0)
         {
             IEnumerable<FeedbackResult> feedback = await feedbackService.FindByLinksAsync(linkCodes);
             result = Ok(feedback);
         }
         else
         {
-            result = BadRequest();
+            result = BadRequest("LinkCodes query parameter is required");
         }
 
         return result;
