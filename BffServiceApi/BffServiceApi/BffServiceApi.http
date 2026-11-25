@@ -1,0 +1,103 @@
+@Bff = http://localhost:5030
+@userCode = cole-aqui-um-codigo-de-usuario
+@teamCode = cole-aqui-um-codigo-de-equipe
+@rootCode = cole-aqui-o-codigo-do-problema
+@linkCode = cole-aqui-o-codigo-de-um-no
+@hypothesisCode = cole-aqui-o-codigo-de-uma-hipotese
+
+### Saude do BFF e dos 5 microsservicos
+GET {{Bff}}/bff/health
+
+### Usuarios
+POST {{Bff}}/bff/users
+Content-Type: application/json
+
+{ "name": "Ana Souza", "email": "ana@satc.edu.br" }
+
+###
+GET {{Bff}}/bff/users?name=ana
+
+### Equipe (membros ja voltam com nome e e-mail)
+POST {{Bff}}/bff/teams
+Content-Type: application/json
+
+{
+  "name": "Equipe Refeitorio",
+  "description": "Projeto de ES",
+  "members": [ { "userCode": "{{userCode}}", "role": "owner" } ]
+}
+
+###
+GET {{Bff}}/bff/teams/{{teamCode}}
+
+### Adiciona (ou troca o papel de) um membro
+POST {{Bff}}/bff/teams/{{teamCode}}/members
+Content-Type: application/json
+
+{ "userCode": "{{userCode}}", "role": "Collaborator" }
+
+### Cria o problema raiz (devolve a arvore)
+POST {{Bff}}/bff/ideas
+Content-Type: application/json
+
+{
+  "title": "Reduzir o desperdicio no refeitorio",
+  "description": "## De onde vem o problema\nEstudantes deixam comida no prato.",
+  "autorCode": "{{userCode}}",
+  "teamCode": "{{teamCode}}"
+}
+
+### Arvore completa (aceita o codigo de qualquer no)
+GET {{Bff}}/bff/ideas/{{rootCode}}/tree?includeDiscarded=true
+
+### Propoe uma solucao/versao (type opcional: inferido pelo pai)
+POST {{Bff}}/bff/links/{{rootCode}}/children
+Content-Type: application/json
+
+{
+  "title": "Aplicativo de reserva de refeicoes",
+  "reason": "Permite saber a demanda antes",
+  "autorCode": "{{userCode}}"
+}
+
+### Painel do no
+GET {{Bff}}/bff/links/{{linkCode}}
+
+### Seleciona o no (irmaos viram descartados)
+PUT {{Bff}}/bff/links/{{linkCode}}/select
+Content-Type: application/json
+
+{ "reason": "Melhor custo-beneficio" }
+
+### Hipotese
+POST {{Bff}}/bff/links/{{linkCode}}/hypotheses
+Content-Type: application/json
+
+{ "description": "Reservas reduzem sobras", "successCriteria": "Sobras caem 20% em 2 semanas" }
+
+### Resultado da hipotese (validated | refuted)
+PUT {{Bff}}/bff/hypotheses/{{hypothesisCode}}/result
+Content-Type: application/json
+
+{ "result": "validated" }
+
+### Feedback (so em no aberto; 409 caso contrario)
+POST {{Bff}}/bff/links/{{rootCode}}/feedbacks
+Content-Type: application/json
+
+{ "autorCode": "{{userCode}}", "text": "Problema muito relevante", "rating": 5 }
+
+### Exportacao: dados agregados
+GET {{Bff}}/bff/export/{{rootCode}}?scope=full&includeHistory=true
+
+### Exportacao: Markdown no perfil "tickets"
+GET {{Bff}}/bff/export/{{rootCode}}?format=markdown&profile=tickets
+
+### Exportacao: so o caminho selecionado em Mermaid
+GET {{Bff}}/bff/export/{{rootCode}}?scope=selected&format=mermaid
+
+### Exportacao: CSV para download
+GET {{Bff}}/bff/export/{{rootCode}}?format=csv&download=true
+
+### Perfis de vocabulario
+GET {{Bff}}/bff/export/profiles
