@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS Teams (
+	Code TEXT PRIMARY KEY,
+	Name TEXT NOT NULL,
+	Description TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS TeamMembers (
+	TeamCode TEXT NOT NULL,
+	UserCode TEXT NOT NULL,
+	Role TEXT NOT NULL,
+	PRIMARY KEY (TeamCode, UserCode),
+	FOREIGN KEY (TeamCode) REFERENCES Teams (Code)
+);

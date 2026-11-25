@@ -1,0 +1,21 @@
+@FeedbackApi_HostAddress = http://localhost:5076
+
+POST {{FeedbackApi_HostAddress}}/api/feedbacks
+Content-Type: application/json
+
+{
+  "linkCode": "link-code",
+  "autorCode": "autor-code",
+  "text": "Comentário sobre o nó",
+  "rating": 5
+}
+
+###
+
+GET {{FeedbackApi_HostAddress}}/api/feedbacks?linkCode=link-code
+Accept: application/json
+
+###
+
+GET {{FeedbackApi_HostAddress}}/api/feedbacks?linkCodes=link-code-1&linkCodes=link-code-2
+Accept: application/json
