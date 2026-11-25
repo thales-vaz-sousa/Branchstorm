@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BffServiceApi/BffApi.csproj" />
+  <Project Path="BffServiceApiClassLibrary/BffApiClassLibrary.csproj" />
+</Solution>
