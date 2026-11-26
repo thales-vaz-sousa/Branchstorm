@@ -24,6 +24,12 @@ COPY --from=build /out/idea       /app/idea
 COPY --from=build /out/hypothesis /app/hypothesis
 COPY --from=build /out/feedback   /app/feedback
 
+COPY --from=build /src/UserServiceApi/UserServiceApi/Database/             /app/user/Database/
+COPY --from=build /src/TeamServiceApi/TeamServiceApi/Database/             /app/team/Database/
+COPY --from=build /src/IdeaServiceApi/IdeaServiceApi/Database/             /app/idea/Database/
+COPY --from=build /src/HypothesisServiceApi/HypothesisServiceApi/Database/ /app/hypothesis/Database/
+COPY --from=build /src/FeedbackApi/FeedbackApi/Database/                   /app/feedback/Database/
+
 COPY deploy/ /etc/gateway/
 RUN chmod +x /etc/gateway/start.sh
 
