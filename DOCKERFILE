@@ -1,93 +1,40 @@
-# ==============================================================================
-# Estágio base de build (.NET SDK)
-# ==============================================================================
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# ---------- BUILD ----------
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-
-COPY ["Branchstorm API/BranchstormApiClient/BranchstormApiClient.csproj", "Branchstorm API/BranchstormApiClient/"]
-COPY ["FeedbackApi/FeedbackApi.slnx", "FeedbackApi/"]
-COPY ["HypothesisServiceApi/HypothesisServiceApi.slnx", "HypothesisServiceApi/"]
-COPY ["IdeaServiceApi/IdeaApi.slnx", "IdeaServiceApi/"]
-COPY ["TeamServiceApi/TeamApi.slnx", "TeamServiceApi/"]
-COPY ["UserServiceApi/UserApi.slnx", "UserServiceApi/"]
-
 COPY . .
 
-# ==============================================================================
-# 1. Branchstorm API (Gateway / Client)
-# ==============================================================================
-FROM build AS publish-gateway
-RUN dotnet publish "Branchstorm API/BranchstormApiClient/BranchstormApiClient.csproj" -c Release -o /app/publish
+RUN dotnet publish UserServiceApi/UserServiceApi/UserApi.csproj                          -c Release -o /out/user
+RUN dotnet publish TeamServiceApi/TeamServiceApi/TeamApi.csproj                          -c Release -o /out/team
+RUN dotnet publish IdeaServiceApi/IdeaServiceApi/IdeaApi.csproj                          -c Release -o /out/idea
+RUN dotnet publish HypothesisServiceApi/HypothesisServiceApi/HypothesisServiceApi.csproj -c Release -o /out/hypothesis
+RUN dotnet publish FeedbackApi/FeedbackApi/FeedbackApi.csproj                            -c Release -o /out/feedback
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS gateway
+# ---------- RUNTIME ----------
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+USER root
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends nginx supervisor gettext-base \
+ && rm -rf /var/lib/apt/lists/* /etc/nginx/sites-enabled/default
+
 WORKDIR /app
-ENV ASPNETCORE_HTTP_PORTS=10000
+COPY --from=build /out/user       /app/user
+COPY --from=build /out/team       /app/team
+COPY --from=build /out/idea       /app/idea
+COPY --from=build /out/hypothesis /app/hypothesis
+COPY --from=build /out/feedback   /app/feedback
+
+COPY deploy/ /etc/gateway/
+RUN chmod +x /etc/gateway/start.sh
+
+ENV ASPNETCORE_ENVIRONMENT=Production \
+    UserApi__BaseUrl=http://127.0.0.1:5252 \
+    TeamApi__BaseUrl=http://127.0.0.1:5236 \
+    IdeaApi__BaseUrl=http://127.0.0.1:5221 \
+    HypothesisApi__BaseUrl=http://127.0.0.1:5159 \
+    FeedbackApi__BaseUrl=http://127.0.0.1:5076 \
+    Services__IdeaApiUrl=http://127.0.0.1:5221 \
+    DOTNET_GCHeapHardLimit=0x8000000
+
 EXPOSE 10000
-COPY --from=publish-gateway /app/publish .
-
-ENTRYPOINT ["dotnet", "BranchstormApiClient.dll"]
-
-# ==============================================================================
-# 2. UserServiceApi
-# ==============================================================================
-FROM build AS publish-user
-RUN dotnet publish "UserServiceApi/UserApi.slnx" -c Release -o /app/publish
-
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS user-api
-WORKDIR /app
-ENV ASPNETCORE_HTTP_PORTS=10000
-EXPOSE 10000
-COPY --from=publish-user /app/publish .
-ENTRYPOINT ["dotnet", "UserServiceApi.dll"]
-
-# ==============================================================================
-# 3. TeamServiceApi
-# ==============================================================================
-FROM build AS publish-team
-RUN dotnet publish "TeamServiceApi/TeamApi.slnx" -c Release -o /app/publish
-
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS team-api
-WORKDIR /app
-ENV ASPNETCORE_HTTP_PORTS=10000
-EXPOSE 10000
-COPY --from=publish-team /app/publish .
-ENTRYPOINT ["dotnet", "TeamServiceApi.dll"]
-
-# ==============================================================================
-# 4. IdeaServiceApi
-# ==============================================================================
-FROM build AS publish-idea
-RUN dotnet publish "IdeaServiceApi/IdeaApi.slnx" -c Release -o /app/publish
-
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS idea-api
-WORKDIR /app
-ENV ASPNETCORE_HTTP_PORTS=10000
-EXPOSE 10000
-COPY --from=publish-idea /app/publish .
-ENTRYPOINT ["dotnet", "IdeaServiceApi.dll"]
-
-# ==============================================================================
-# 5. HypothesisServiceApi
-# ==============================================================================
-FROM build AS publish-hypothesis
-RUN dotnet publish "HypothesisServiceApi/HypothesisServiceApi.slnx" -c Release -o /app/publish
-
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS hypothesis-api
-WORKDIR /app
-ENV ASPNETCORE_HTTP_PORTS=10000
-EXPOSE 10000
-COPY --from=publish-hypothesis /app/publish .
-ENTRYPOINT ["dotnet", "HypothesisServiceApi.dll"]
-
-# ==============================================================================
-# 6. FeedbackApi
-# ==============================================================================
-FROM build AS publish-feedback
-RUN dotnet publish "FeedbackApi/FeedbackApi.slnx" -c Release -o /app/publish
-
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS feedback-api
-WORKDIR /app
-ENV ASPNETCORE_HTTP_PORTS=10000
-EXPOSE 10000
-COPY --from=publish-feedback /app/publish .
-ENTRYPOINT ["dotnet", "FeedbackApi.dll"]
+CMD ["/etc/gateway/start.sh"]
